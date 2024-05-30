@@ -14,7 +14,7 @@ K8S的各种命令帮助文档做得非常不错，遇到问题可以多查help�
 
 ## 2. **Namespace**
 
-K8s 中，[**命名空间（Namespace）** ](https://kubernetes.io/zh-cn/docs/concepts/overview/working-with-objects/namespaces/)提供一种机制，将同一集群中的资源划分为相互隔离的组。同一命名空间内的资 源名称要唯一，命名空间是用来隔离资源的，不隔离网络。
+K8s 中，[命名空间（Namespace）](https://kubernetes.io/zh-cn/docs/concepts/overview/working-with-objects/namespaces/)提供一种机制，将同一集群中的资源划分为相互隔离的组。同一命名空间内的资 源名称要唯一，命名空间是用来隔离资源的，不隔离网络。
 
 Kubernetes 启动时会创建四个初始命名空间：
 
@@ -80,7 +80,7 @@ kubectl delete -f my-namespace.yaml
 
 ## 3. **Pod**
 
-[**Pod**](https://kubernetes.io/zh-cn/docs/concepts/workloads/pods/) **是可以在 Kubernetes 中创建和管理的、最小的可部署的计算单元。Pod**（就像在鲸鱼荚或者豌 豆荚中）**是一组（一个或多个）容器**； 这些容器共享存储、网络、以及怎样运行这些容器的声明。
+[Pod](https://kubernetes.io/zh-cn/docs/concepts/workloads/pods/) **是可以在 Kubernetes 中创建和管理的、最小的可部署的计算单元。Pod**（就像在鲸鱼荚或者豌 豆荚中）**是一组（一个或多个）容器**； 这些容器共享存储、网络、以及怎样运行这些容器的声明。
 
 ![image.png](https://hoey-images.oss-cn-hangzhou.aliyuncs.com/img/20240529124750.png)
 
@@ -144,12 +144,10 @@ kubectl apply -f  nginx-pod.yaml
 ```shell
 1 kubectl delete -f  nginx-pod.yaml
 ```
+
 ![image.png](https://hoey-images.oss-cn-hangzhou.aliyuncs.com/img/20240529130454.png)
 
-
 **思考：一个pod中可以运行多个容器吗？**
-
-
 
 ```yaml
 apiVersion: v1
@@ -167,17 +165,19 @@ spec:
 ```
 
 执行下面命令
+
 ```
 kubectl describe pod myapp
 ```
 
 可以看到创建出的两个container
+
 ![image.png](https://hoey-images.oss-cn-hangzhou.aliyuncs.com/img/20240529131617.png)
 
 
 ## 4. **Deployment**
 
-Deployment负责创建和更新应用程序的实例，**使Pod拥有多副本，自愈，扩缩容等能力**。创建 Deployment后，Kubernetes Master 将应用程序实例调度到集群中的各个节点上。如果托管实例的 节点关闭或被删除，Deployment控制器会将该实例替换为群集中另一个节点上的实例。这提供了一 种自我修复机制来解决机器故障维护问题。
+Deployment负责创建和更新应用程序的实例，**使Pod拥有多副本，自愈，扩缩容等能力**。创建 Deployment后，Kubernetes Master 将应用程序实例调度到集群中的各个节点上。如果托管实例的 节点关闭或被删除，Deployment控制器会将该实例替换为群集中另一个节点上的实例。这提供了一种自我修复机制来解决机器故障维护问题。
 
 ![image.png](https://hoey-images.oss-cn-hangzhou.aliyuncs.com/img/20240529131712.png)
 
@@ -225,6 +225,7 @@ kubectl create deployment my-tomcat --image=tomcat:9.0.55
 #查看pod信息，-w意思是一直等待观察pod信息的变动
 kubectl get pod -w
 ```
+
 ![image.png](https://hoey-images.oss-cn-hangzhou.aliyuncs.com/img/20240529133048.png)
 
 
@@ -233,6 +234,7 @@ kubectl get pod -w
 ```shell
 kubectl delete pod  my-tomcat-6d6b57c8c8-n5gm4
 ```
+
 ![image.png](https://hoey-images.oss-cn-hangzhou.aliyuncs.com/img/20240529133106.png)
 
 
@@ -245,6 +247,7 @@ kubectl delete pod  my-tomcat-6d6b57c8c8-n5gm4
 # 创建3个副本
 kubectl create deployment my-tomcat --image=tomcat:9.0.55 --replicas=3
 ```
+
 ![image.png](https://hoey-images.oss-cn-hangzhou.aliyuncs.com/img/20240529133121.png)
 
 - yaml方式
@@ -317,6 +320,7 @@ kubectl describe pod my-tomcat-85c5c8f685-lnkfm
 ```shell
 kubectl rollout history deploy my-tomcat
 ```
+
 ![image.png](https://hoey-images.oss-cn-hangzhou.aliyuncs.com/img/20240530105646.png)
 
 
@@ -333,6 +337,7 @@ kubectl rollout undo deployment/my-dep --to-revision=2
 
 
 查看pod详情，发现版本已经回退了
+
 ![image.png](https://hoey-images.oss-cn-hangzhou.aliyuncs.com/img/20240530105804.png)
 
 **访问tomcat pod**
@@ -344,11 +349,9 @@ curl 10.244.169.164:8080
 
 ![image.png](https://hoey-images.oss-cn-hangzhou.aliyuncs.com/img/20240530105833.png)
 
-
 **集群外部访问**
 
 ![image.png](https://hoey-images.oss-cn-hangzhou.aliyuncs.com/img/20240530111134.png)
-
 
 当我们在集群之外访问是发现无法访问，那么集群之外的客户端如何才能访问呢？这就需要我们的 ser vice服务了，下面我们就创建一个service，使外部客户端可以访问我们的pod
 
@@ -359,7 +362,7 @@ curl 10.244.169.164:8080
 尽管每个Pod 都有一个唯一的IP地址，但是如果没有Service，这些IP不会暴露在群集外部。Service允 许您的应用程序接收流量。Service也可以用在ServiceSpec标记type的方式暴露，type类型如下：
 
 - ClusterIP（默认）：在集群的内部IP上公开Service。这种类型使得Service只能从集群内访问。
-- NodePort：使用NAT在集群中每个选定Node的相同端口上公开Service。使用 **<NodeIP>:<NodePort>** 从集 群外部访问Service。是ClusterIP的超集。
+- NodePort：使用NAT在集群中每个选定Node的相同端口上公开Service。使用 ``<NodeIP>:<NodePort>`` 从集 群外部访问Service。是ClusterIP的超集。
 - LoadBalancer：在当前云中创建一个外部负载均衡器(如果支持的话)，并为Service分配一个固定的外部IP。是 NodePort的超集。
 - ExternalName：通过返回带有该名称的CNAME记录，使用任意名称（由spec中的externalName指定）公开 Service。不使用代理。
 
