@@ -1,8 +1,9 @@
 ---
-{"dg-publish":true,"permalink":"/002-lean/Doris/Doris 倒排索引优化/","dgPassFrontmatter":true}
+{"dg-publish":true,"dg-hide":true,"dg-hide-in-graph":true,"permalink":"/002-lean/Doris/Doris 倒排索引优化/","hide":true,"hideInGraph":true,"dgPassFrontmatter":true}
 ---
 
 
+转自：[Doris的倒排索引功能，好使不？ (qq.com)](https://mp.weixin.qq.com/s/dJ65aGYNd7x-dTK4lbAPKA)
 
 在 Doris 的官方介绍里，2.0之后引入了「倒排索引」功能，说到倒排索引呢，我们一般第一想到的应该是 Elasticsearch、Solr 这样具有代表性的搜索引擎型的数据
 库。  Elasticsearch 的核心技术实现，就是用的倒排索引，而它的好用程度也早就在工业界得到了验证，是一款非常成功的，将倒排索引这个技术落地的开源软件。至于2.0之后，Doris 也引入了这个倒排索引功能，好不好用，那么今天这篇文章，咱一起来测试验证一番。  
@@ -17,7 +18,8 @@
 
 文档关于倒排索引部分的描述，很容易就能在左侧的目录中找到，
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/G1NpMCNMwLoJ56RkFCIgH0TQDXEvy3qhBhcjCjsFs3srsAkkibu2RFUxg5jypia175y26l6lG6UiauelrEreh0A9w/640?wx_fmt=png&from=appmsg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1)
+![image.png](https://hoey-images.oss-cn-hangzhou.aliyuncs.com/img/20240606124843.png)
+
 
 从描述内容来看，涵盖了对倒排索引的名词解释、功能、语法，以及案例说明，对一个初次接触的人来说，可以说是很全了，这里不做过多的赘述。
 
@@ -48,7 +50,8 @@
 
 我们知道，对于一个倒排索引来说，想要满足好的匹配查询体验，必须要有一个足够人性化的「分词器」，但是从目前 Doris 的官网来看，支持的还不够丰富：  
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/G1NpMCNMwLrnoXgTU8NkxTZalehiaDiada3NLyg5y3nm8PK0lUib64RFdIkKTHzWRylf4ITwr6qWuDdeicgyI0dwWQ/640?wx_fmt=png&from=appmsg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1)
+![image.png](https://hoey-images.oss-cn-hangzhou.aliyuncs.com/img/20240606124854.png)
+
 
 目前只有内置的4种分词方式，显然，对于这一点，是不及 ES 的，在我之前经历的项目中，为了满足个性化的分词要求，ES 是可以用插件的方式添加分词器，而且可以添加完全贴合业务搜索要求的分词字典，来达到精准分词的目的。  
 
@@ -66,15 +69,18 @@
 
 好奇心驱使，我**在一张压根就没有添加倒排索引的表里，用「MATCH_ANY」跟「MATCH_ALL」来查找关键词****，居然也可以**：  
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/G1NpMCNMwLrnoXgTU8NkxTZalehiaDiadaktvo11XmuZM0BxFD9Cuzdccxict9Yb6icyIk7ovNXbVJZaczkSw0dFdA/640?wx_fmt=png&from=appmsg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1)
+![image.png](https://hoey-images.oss-cn-hangzhou.aliyuncs.com/img/20240606124931.png)
+
 
 _选取一张数据量近9百万的表_
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/G1NpMCNMwLrnoXgTU8NkxTZalehiaDiada5WvwPRGLV5gnGNjubGfCIZHriaRvzpktRR3FTKJqcl9wzZdw8wPQpsA/640?wx_fmt=png&from=appmsg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1)
+![image.png](https://hoey-images.oss-cn-hangzhou.aliyuncs.com/img/20240606125011.png)
+
 
 _建表语句(没有添加倒排索引)_
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/G1NpMCNMwLrnoXgTU8NkxTZalehiaDiadaMnHZqw5Epeauvib7zhEwhLQJlY0wVXGoiayX8ibNII9m9UyEHdLOrZ7gA/640?wx_fmt=png&from=appmsg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1)
+![image.png](https://hoey-images.oss-cn-hangzhou.aliyuncs.com/img/20240606125027.png)
+
 
 _利用MATCH_ANY、MATCH_ALL 对其查询_
 
@@ -95,19 +101,22 @@ ALTER TABLE dns_logs ADD INDEX idx_domain(domain) USING INVERTED PROPERT
 这个语句只会让该表的**新增数据**生效，那为了让存量数据也生效，需要执行下面这一步：  
 
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/G1NpMCNMwLrnoXgTU8NkxTZalehiaDiada4KibH70Js3Utszhb65K0kB5YibqyqSAzl3A7eGmeMiaibYO7G9fAVGvTjw/640?wx_fmt=png&from=appmsg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1)
+![image.png](https://hoey-images.oss-cn-hangzhou.aliyuncs.com/img/20240606125100.png)
+
 
 执行后，会触发后台对 domain 这个字段的历史数据处理，数据量越大，那么处理的时间就会越长。  
 
 查看后台处理进度：  
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/G1NpMCNMwLrnoXgTU8NkxTZalehiaDiadaAu4FLwic8ksJiaibNQko1cOSIcP6O85sNmo5PunBAODSy8cGpNTicxWyzg/640?wx_fmt=png&from=appmsg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1)
+![image.png](https://hoey-images.oss-cn-hangzhou.aliyuncs.com/img/20240606125128.png)
+
 
 可以看到，近9百万条数据，大概用了4秒钟就完成了 domain 这个字段的倒排索引创建过程。  
 
 这个时候，我们来看一下，当查询条件中的一个字段完成倒排索引的创建之后，能带来多少的查询加速：  
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/G1NpMCNMwLrnoXgTU8NkxTZalehiaDiadaaNdqNQD0En9mLEh17Y0iaHq4MVv2q4anzqBjfmt6OtQz0w7UPrDPYLQ/640?wx_fmt=png&from=appmsg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1)
+![image.png](https://hoey-images.oss-cn-hangzhou.aliyuncs.com/img/20240606125143.png)
+
 
 可以看到，查询时间由原来的2.7秒，缩短为**0.46秒**，提速超过**2秒**。
 
@@ -117,13 +126,15 @@ ALTER TABLE dns_logs ADD INDEX idx_domain(domain) USING INVERTED PROPERT
 
 最后查看创建进度：
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/G1NpMCNMwLrnoXgTU8NkxTZalehiaDiadaT7q3mWv2AUBBctrblD3jtw9XhFBRrT9wLRGrytgyxLVs1cWY3fRibSw/640?wx_fmt=png&from=appmsg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1)
+![image.png](https://hoey-images.oss-cn-hangzhou.aliyuncs.com/img/20240606125212.png)
+
 
 可以看到，通过对 client_ip 的历史数据创建倒排索引(近9百万条记录)，一共花了约2秒钟。
 
 再次运行之前的查询语句，看两个字段都创建了倒排索引之后，其查询效率能提高多少：  
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/G1NpMCNMwLrnoXgTU8NkxTZalehiaDiadaSicm85XD9FrHDuQjaomutXAluoqmBniaWcgAouebhM5fI7zqV19fTrPA/640?wx_fmt=png&from=appmsg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1)
+![image.png](https://hoey-images.oss-cn-hangzhou.aliyuncs.com/img/20240606125225.png)
+
 
 可以看到，这一次查询时间由之前的0.46秒，提升到**0.13秒**。
   
@@ -134,11 +145,13 @@ ALTER TABLE dns_logs ADD INDEX idx_domain(domain) USING INVERTED PROPERT
 
 这里有个我认为比较重要，但是官方文档没有提及的点，那就是，Doris 虽然对表中的字段添加了倒排索(带分词的)之后，**既可以对其字段进行关键词/字检索，同时，依然可以对其字段的全部内容进行等值检索**。
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/G1NpMCNMwLrnoXgTU8NkxTZalehiaDiadaOoSoKZcyDoiaWunFIlN4JEvvZsBerS6GcMOJXGLr7dmy8GIz4A2cqHw/640?wx_fmt=png&from=appmsg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1)
+![image.png](https://hoey-images.oss-cn-hangzhou.aliyuncs.com/img/20240606125234.png)
+
 
 _全文关键词检索方式_
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/G1NpMCNMwLrnoXgTU8NkxTZalehiaDiadaVtvyIaB8N9M5HH1CEXE06H32M8iat1FDD09XichVFoP34m3VXwQT9XdA/640?wx_fmt=png&from=appmsg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1)
+![image.png](https://hoey-images.oss-cn-hangzhou.aliyuncs.com/img/20240606125242.png)
+
 
 _全文等值检索方式_
 
@@ -150,7 +163,8 @@ _全文等值检索方式_
 
 另外，对于我比较关心的存储空间膨胀问题，这里可以看出来，
 
-![图片](https://mmbiz.qpic.cn/mmbiz_png/G1NpMCNMwLrnoXgTU8NkxTZalehiaDiadaZVSwJljwJ0Ms09Od2LeupS626lpLo6g7CYunZdmR5L9p2DgVrTVdAg/640?wx_fmt=png&from=appmsg&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1)  
+![image.png](https://hoey-images.oss-cn-hangzhou.aliyuncs.com/img/20240606125251.png)
+
 
 在添加了2个字段的倒排索引之后，空间膨胀了 **0.035GB**，个人觉得还行，毕竟，索引的本质不就是拿存储空间换查询效率嘛。  
 
@@ -169,4 +183,3 @@ _全文等值检索方式_
 
 你觉得呢？
 
-转自：[Doris的倒排索引功能，好使不？ (qq.com)](https://mp.weixin.qq.com/s/dJ65aGYNd7x-dTK4lbAPKA)
