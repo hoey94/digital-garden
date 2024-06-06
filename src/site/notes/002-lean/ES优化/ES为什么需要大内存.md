@@ -3,6 +3,11 @@
 ---
 
 
+公司的环境及运行情况
+![image.png](https://hoey-images.oss-cn-hangzhou.aliyuncs.com/img/20240606095010.png)
+
+存储7TB的数据 吃了 将近1T的内存，问什么ES会消耗如此大的内存？
+
 ### 一、Elasticsearch为什么需要大内存
 
 Elasticsearch (ES) 需要大量内存的原因主要与其架构和设计目标有关。以下是一些具体原因：
