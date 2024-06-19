@@ -1,0 +1,3 @@
+---
+{"dg-publish":true,"dlink":["[[--高等数学--]]"],"tags":null,"permalink":"/038-数字科学/math/概率论/bootstrap方法/","dgPassFrontmatter":true}
+---
